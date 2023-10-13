@@ -298,10 +298,10 @@ def subsample_patch_coords(pdb, pid, precomp_dir, cv=None):
     """
 
     if cv is None:
-        pc = np.load(os.path.join(precomp_dir, pdb, pid+'_list_indices.npy'))
+        pc = np.load(os.path.join(precomp_dir, pdb, pid+'_list_indices.npy'), allow_pickle=True)
     else:
         pc = {}
-        coords = np.load(os.path.join(precomp_dir, pdb, pid+'_list_indices.npy'))[cv]
+        coords = np.load(os.path.join(precomp_dir, pdb, pid+'_list_indices.npy'), allow_pickle=True)[cv]
         for iii, v in enumerate(cv):
             pc[v] = coords[iii]
 

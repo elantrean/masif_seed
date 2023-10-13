@@ -1,0 +1,91 @@
+Bootstrap: docker
+From: pymesh/pymesh
+Stage: spython-base
+
+%post
+# A dockerfile must always start by importing the base image.
+# We use the keyword 'FROM' to do that.
+# In our example, we want import the python image.
+# So we write 'python' for the image name and 'latest' for the version.
+
+# In order to launch our python code, we must import it into our image.
+# We use the keyword 'COPY' to do that.
+# The first parameter 'main.py' is the name of the file on the host.
+# The second parameter '/' is the path where to put the file on the image.
+# Here we put the file at the image root folder.
+
+#RUN git clone --single-branch https://github.com/LPDI-EPFL/masif
+
+# install necessary dependencies
+apt-get update && \
+apt-get install -y wget git unzip cmake vim libgl1-mesa-glx dssp
+	
+# DOWNLOAD/INSTALL APBS
+mkdir /install
+mkdir -p /install
+cd /install
+git clone https://github.com/Electrostatics/apbs-pdb2pqr
+mkdir -p /install/apbs-pdb2pqr
+cd /install/apbs-pdb2pqr
+ls
+git checkout b3bfeec
+git submodule init
+git submodule update
+ls
+cmake -DGET_MSMS=ON apbs
+make
+make install
+cp -r /install/apbs-pdb2pqr/apbs/externals/mesh_routines/msms/msms_i86_64Linux2_2.6.1 /root/msms/
+curl https://bootstrap.pypa.io/pip/3.6/get-pip.py -o get-pip.py
+python get-pip.py
+
+# INSTALL PDB2PQR
+mkdir -p /install/apbs-pdb2pqr/pdb2pqr
+cd /install/apbs-pdb2pqr/pdb2pqr
+git checkout b3bfeec
+python2.7 scons/scons.py install
+
+# Setup environment variables 
+MSMS_BIN=/usr/local/bin/msms
+APBS_BIN=/usr/local/bin/apbs
+MULTIVALUE_BIN=/usr/local/share/apbs/tools/bin/multivalue
+PDB2PQR_BIN=/usr/.local/bin/pdb2pqr30
+
+# DOWNLOAD reduce (for protonation)
+mkdir -p /install
+cd /install
+git clone https://github.com/rlabduke/reduce.git
+mkdir -p /install/reduce
+cd /install/reduce
+make install
+mkdir -p /install/reduce/build/reduce
+mkdir -p /install/reduce/build/reduce
+cd /install/reduce/build/reduce
+cmake /install/reduce/reduce_src
+mkdir -p /install/reduce/reduce_src
+cd /install/reduce/reduce_src
+make
+make install
+
+# Install python libraries
+pip3 install matplotlib
+pip3 install ipython Biopython scikit-learn tensorflow==1.12 networkx open3d==0.8.0.0 dask==1.2.2 packaging
+#RUN pip install StrBioInfo 
+
+# Clone masif
+mkdir -p /
+cd /
+
+# We need to define the command to launch when we are going to run the image.
+# We use the keyword 'CMD' to do that.
+%environment
+export MSMS_BIN=/usr/local/bin/msms
+export APBS_BIN=/usr/local/bin/apbs
+export MULTIVALUE_BIN=/usr/local/share/apbs/tools/bin/multivalue
+export PDB2PQR_BIN=/root/.local/bin/pdb2pqr30
+%runscript
+cd /
+exec /bin/bash bash "$@"
+%startscript
+cd /
+exec /bin/bash bash "$@"

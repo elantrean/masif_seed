@@ -85,7 +85,7 @@ for count, ppi_pair_id in enumerate(ppi_list):
     print(ppi_pair_id)
 
     out_desc_dir = os.path.join(params["desc_dir"], ppi_pair_id)
-    if not os.path.exists(os.path.join(out_desc_dir, 'p1_desc_straight.npy')):
+    if not os.path.exists(out_desc_dir):
         os.mkdir(out_desc_dir)
 #    else:
 #        # Ignore this one as it was already computed.

@@ -2,7 +2,7 @@ import os
 import numpy
 from subprocess import Popen, PIPE
 import pymesh
-
+from IPython.core.debugger import set_trace
 from default_config.global_vars import apbs_bin, pdb2pqr_bin, multivalue_bin
 import random
 
@@ -23,10 +23,11 @@ def computeAPBS(vertices, pdb_file, tmp_file_base):
     pdbname = pdb_file.split("/")[-1]
     args = [
         pdb2pqr_bin,
-        "--ff=parse",
+        "--ff=PARSE",
         "--whitespace",
         "--noopt",
         "--apbs-input",
+        filename_base+".in",
         pdbname,
         filename_base,
     ]
@@ -62,7 +63,6 @@ def computeAPBS(vertices, pdb_file, tmp_file_base):
     os.remove(remove_fn+'.csv')
     os.remove(remove_fn+'.dx')
     os.remove(remove_fn+'.in')
-    os.remove(remove_fn+'-input.p')
     os.remove(remove_fn+'_out.csv')
 
     return charges
